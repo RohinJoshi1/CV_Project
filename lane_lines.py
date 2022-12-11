@@ -3,7 +3,6 @@ import matplotlib.image as mpimg
 import numpy as np
 import cv2
 import os
-from moviepy.editor import VideoFileClip
 
 CACHE_LEFT_SLOPE = 0
 CACHE_RIGHT_SLOPE = 0
@@ -117,6 +116,7 @@ def process_image(image):
     """
     # PARAMETERS
     imshape = image.shape
+    print(imshape)
     kernel_size = 3
     sigma_x = 0
     low_canny_threshold = 25
@@ -148,6 +148,7 @@ def process_image(image):
 
     # HOUGH TRANSFORM
     lines = cv2.HoughLinesP(masked, rho, theta, hough_threshold, np.array([]), minLineLength=min_line_len, maxLineGap=max_line_gap)
+    print(lines)
     hough_image = np.zeros((*masked.shape, 3), dtype=np.uint8)
     draw_lines(hough_image, lines)
 
@@ -169,22 +170,36 @@ for name in imageNames:
     plt.imsave("final_images/final_{}".format(name), process_image(image))
 
 # CREATE VIDEO THAT DRAWS LANE LINES ON solidWhiteRight.mp4
-reset_globals()
-white_output = 'white.mp4'
-clip1 = VideoFileClip("solidWhiteRight.mp4")
-white_clip = clip1.fl_image(process_image)
-white_clip.write_videofile(white_output, audio=False)
+# reset_globals()
+# white_output = 'white.mp4'
+# clip1 = VideoFileClip("solidWhiteRight.mp4")
+# white_clip = clip1.fl_image(process_image)
+# white_clip.write_videofile(white_output, audio=False)
 
-# CREATE VIDEO THAT DRAWS LANE LINES ON solidYellowLeft.mp4
-reset_globals()
-yellow_output = 'yellow.mp4'
-clip1 = VideoFileClip("solidYellowLeft.mp4")
-yellow_clip = clip1.fl_image(process_image)
-yellow_clip.write_videofile(yellow_output, audio=False)
+# # CREATE VIDEO THAT DRAWS LANE LINES ON solidYellowLeft.mp4
+# reset_globals()
+# yellow_output = 'yellow.mp4'
+# clip1 = VideoFileClip("solidYellowLeft.mp4")
+# yellow_clip = clip1.fl_image(process_image)
+# yellow_clip.write_videofile(yellow_output, audio=False)
 
-# CREATE VIDEO THAT DRAWS LANE LINES ON challenge.mp4
-reset_globals()
-challenge_output = 'extra.mp4'
-clip2 = VideoFileClip('challenge.mp4')
-challenge_clip = clip2.fl_image(process_image)
-challenge_clip.write_videofile(challenge_output, audio=False)
+# # CREATE VIDEO THAT DRAWS LANE LINES ON challenge.mp4
+# reset_globals()
+# challenge_output = 'extra.mp4'
+# clip2 = VideoFileClip('challenge.mp4')
+# challenge_clip = clip2.fl_image(process_image)
+# challenge_clip.write_videofile(challenge_output, audio=False)
+
+capture = cv2.VideoCapture("test2.mp4")
+while( capture.isOpened()):
+    _, frame = capture.read()
+    combined_image = process_image(frame)
+
+    
+
+    cv2.imshow('result', combined_image)
+    if cv2.waitKey(5) == ord('q'):
+        break
+
+capture.release()
+cv2.destroyAllWindows()
