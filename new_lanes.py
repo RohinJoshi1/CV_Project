@@ -49,11 +49,9 @@ def region_of_interest(img, vertices):
 
 def draw_lines(img, lines, color=[255, 0, 0], thickness=10):
     """
-    NOTE: this is the function you might want to use as a starting point once you want to 
+    this is the function you might want to use as a starting point once you want to 
     average/extrapolate the line segments you detect to map out the full
-    extent of the lane (going from the result shown in raw-lines-example.mp4
-    to that shown in P1_example.mp4).  
-    
+    extent of the lane 
     Think about things like separating line segments by their 
     slope ((y2-y1)/(x2-x1)) to decide which segments are part of the left
     line vs. the right line.  Then, you can average the position of each of 
@@ -178,7 +176,7 @@ def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
         line_img = np.zeros((*img.shape, 3), dtype=np.uint8)  # 3-channel RGB image
         draw_lines(line_img, lines)
     except Exception as e:
-        print(e)
+        pass
     #line_img = np.zeros(img.shape, dtype=np.uint8)  # this produces single-channel (grayscale) image
     
     #draw_lines_debug2(line_img, lines)
@@ -221,7 +219,6 @@ def filter_colors(image):
 
     # Combine the two above images
     image2 = cv2.addWeighted(white_image, 1., yellow_image, 1., 0.)
-
     return image2
 
 # Global parameters
@@ -250,10 +247,9 @@ max_line_gap = 20    # maximum gap in pixels between connectable line segments
 def annotate_image(image_in):
     """ Given an image Numpy array, return the annotated image as a Numpy array """
     # Only keep white and yellow pixels in the image, all other pixels become black
-    image = filter_colors(image_in)
-    
+    # image = filter_colors(image_in)
+    image = image_in
     # Read in and grayscale the image
-    #image = (image*255).astype('uint8')  # this step is unnecessary now
     gray = grayscale(image)
 
     # Apply Gaussian smoothing
@@ -261,7 +257,8 @@ def annotate_image(image_in):
 
     # Apply Canny Edge Detector
     edges = canny(blur_gray, low_threshold, high_threshold)
-
+    cv2.imshow('edges',edges)
+    print("Edges",edges)
     # Create masked edges using trapezoid-shaped region-of-interest
     imshape = image.shape
     vertices = np.array([[\
@@ -271,7 +268,7 @@ def annotate_image(image_in):
         (imshape[1] - (imshape[1] * (1 - trap_bottom_width)) // 2, imshape[0])]]\
         , dtype=np.int32)
     masked_edges = region_of_interest(edges, vertices)
-
+    print("masked_edges",masked_edges)
     # Run Hough on edge detected image
     line_image = hough_lines(masked_edges, rho, theta, threshold, min_line_length, max_line_gap)
     
@@ -293,18 +290,15 @@ def annotate_image(image_in):
 #     plt.imsave(os.path.join('test_images', fname), annotated_image)
 
 def process_image(image):
-    # NOTE: The output you return should be a color image (3 channel) for processing video below
-    # TODO: put your pipeline here,
-    # you should return the final output (image with lines are drawn on lanes)
     result = annotate_image(image)
-
     return result
 
 
 capture = cv2.VideoCapture("test2.mp4")
 while( capture.isOpened()):
     _, frame = capture.read()
-    plt.imshow(frame)
+    # np.reshape(frame,(960,-1))
+    np.resize(frame,(960,540))
     combined_image = process_image(frame)
     cv2.imshow('result', combined_image)
     if cv2.waitKey(5) == ord('q'):
